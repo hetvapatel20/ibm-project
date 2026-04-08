@@ -3,3 +3,11 @@ flask-cors
 gunicorn
 opencv-python-headless
 numpy
+flask
+flask-cors
+gunicorn
+opencv-python-headless
+numpy
+tensorflow-cpu==2.15.0
+requests
+psutil
