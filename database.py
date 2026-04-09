@@ -9,6 +9,7 @@ def get_connection():
     conn.row_factory = sqlite3.Row # Isse data dictionary format me milta hai
     return conn
 
+
 def init_db():
     try:
         conn = get_connection()
