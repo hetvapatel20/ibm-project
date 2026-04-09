@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: traffic-management-system
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: SECRET_KEY
+        value: smart_traffic_render_2026
+      - key: PORT
+        value: 5000
