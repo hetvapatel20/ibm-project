@@ -7,6 +7,7 @@ import random
 import csv
 from io import StringIO
 import requests
+import numpy as np
 from functools import wraps
 
 # --- 📂 IMPORT CUSTOM MODULES ---
@@ -31,20 +32,25 @@ RESIZE_DIM = (640, 360) # Video resolution
 # --- 📹 4 TRAFFIC CAMERAS (Static Files) ---
 # Tame static folder ma traffic1.mp4 thi traffic4.mp4 mukya chhe te load thase
 VIDEOS = [
-    "static/traffic1.mp4", 
+    "static/traffic1.mp4",
     "static/traffic2.mp4",
-    "static/traffic3.mp4", 
+    "static/traffic3.mp4",
     "static/traffic4.mp4"
 ]
 
 cameras = []
 for i, path in enumerate(VIDEOS):
-    cap = cv2.VideoCapture(path)
-    if not cap.isOpened():
-        print(f"⚠️ Warning: Could not open {path}. Check if file exists in static folder.")
-    else:
-        print(f"✅ Camera {i+1} Initialized: {path}")
-    cameras.append(cap)
+    try:
+        cap = cv2.VideoCapture(path)
+        if not cap.isOpened():
+            print(f"⚠️ Warning: Could not open {path}. Using placeholder.")
+            cameras.append(None)  # Placeholder for missing video
+        else:
+            print(f"✅ Camera {i+1} Initialized: {path}")
+            cameras.append(cap)
+    except Exception as e:
+        print(f"⚠️ Error loading {path}: {e}")
+        cameras.append(None)  # Placeholder for error
 
 # --- 🧠 AI INITIALIZATION ---
 print("⏳ Loading AI Model...")
@@ -62,35 +68,52 @@ current_state = {
 # --- 🎥 FRAME GENERATOR ---
 def generate_frames(lane_id):
     cam = cameras[lane_id]
+
+    # If camera/video not available, create placeholder frame
+    if cam is None:
+        print(f"⚠️ Camera {lane_id+1} not available, using placeholder")
+        # Create a placeholder frame
+        placeholder = np.zeros((240, 320, 3), dtype=np.uint8)
+        cv2.putText(placeholder, f"LANE {lane_id+1}", (50, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(placeholder, "VIDEO UNAVAILABLE", (20, 150),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        while True:
+            ret, buffer = cv2.imencode('.jpg', placeholder, [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY])
+            yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            time.sleep(1)  # Update every second
+
+    # Normal video processing
     last_processed_frame = None
     frame_count = 0
-    
+
     while True:
         success, frame = cam.read()
-        
+
         # Loop Video: Jo video khatam thai jay to restart karo
         if not success:
             cam.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
         frame_count += 1
-        
+
         # Performance mate har 'FRAME_SKIP' frame e j process thase
         if frame_count % FRAME_SKIP == 0:
             frame = cv2.resize(frame, (320, 180))
-            
+
             # AI logic thi detection
             processed_frame, counts, pcu, is_emergency = detector.process_frame(frame)
-            
+
             # State update
             current_state["lanes"][lane_id]["pcu"] = pcu
             current_state["lanes"][lane_id]["counts"] = counts
-            
+
             # Signal Overlay (Visual)
             color = (0, 255, 0) if current_state["lanes"][lane_id]["signal"] == "GREEN" else (0, 0, 255)
-            cv2.putText(processed_frame, f"LANE {lane_id+1}: {current_state['lanes'][lane_id]['signal']}", 
+            cv2.putText(processed_frame, f"LANE {lane_id+1}: {current_state['lanes'][lane_id]['signal']}",
                         (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-            
+
             last_processed_frame = processed_frame
         else:
             processed_frame = last_processed_frame if last_processed_frame is not None else frame
@@ -106,7 +129,7 @@ def index():
     # Login logic tame database.py ma set kari hoy to session check kari sako
     return render_template('dashboard.html')
 
-@app.route('/video_feed_<int:lane_id>')
+@app.route('/video_feed/<int:lane_id>')
 def video_feed(lane_id):
     # index 0 to 3 hovo joie
     if 1 <= lane_id <= 4:
