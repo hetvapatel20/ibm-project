@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, Response, jsonify, request, session, redirect, url_for, make_response
 from flask_cors import CORS
 import cv2
@@ -237,7 +236,7 @@ def create_ticket():
 
     try:
         # Send to FastAPI Server
-        response = requests.post("http://127.0.0.1:5005/api/v1/tickets/", json=fastapi_payload, timeout=2)
+        response = requests.post("http://127.0.0.1:8000/api/v1/tickets/", json=fastapi_payload, timeout=2)
         if response.status_code == 200:
             ticket_id = response.json()['ticket_id']
             return jsonify({"status": "success", "ticket": f"TKT-{ticket_id}"})
@@ -262,7 +261,7 @@ def toggle_accident():
             "severity": "critical"
         }
         try:
-            requests.post("http://127.0.0.1:5005/api/v1/tickets/", json=fastapi_payload, timeout=2)
+            requests.post("http://127.0.0.1:8000/api/v1/tickets/", json=fastapi_payload, timeout=2)
         except:
             ticket_id = f"SOS-{random.randint(1000, 9999)}"
             database.add_ticket(ticket_id, "CRITICAL: Collision Detected", "CRITICAL", "Global Lockdown")
@@ -312,14 +311,17 @@ def chat():
         reply = "🤖 I am your NOC AI. Ask about 'camera offline', 'lag', 'tickets', or 'excel download'."
 
     return jsonify({"response": reply})
+
 # --- 🚀 MAIN ENTRY POINT ---
 if __name__ == "__main__":
     database.init_db()
     
-    # Render mate dynamic port levu jaruri che
-    port = int(os.environ.get("PORT", 5005)) 
+    port = int(os.environ.get('PORT', 5005))
+    print("\n" + "="*50)
+    print("🔒 SECURE TRAFFIC AI SERVER STARTING...")
+    print(f"🚀 PERFORMANCE CONFIG: Skip={FRAME_SKIP}, Quality={JPEG_QUALITY}%")
+    print(f"🌍 SERVER URL: http://127.0.0.1:{port}") 
+    print("="*50 + "\n")
     
-    print(f"🚀 SERVER URL: http://0.0.0.0:{port}")
-    
-    # Debug=False ane threaded=True Render mate barobar che
-    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
+    # 🔥 FIXED: ssl_context removed to prevent Vercel/Ngrok connection errors
+    app.run(debug=False, threaded=True, host='0.0.0.0', port=port)

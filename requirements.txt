@@ -1,26 +1,9 @@
-# =====================================================
-# SmartCity Traffic Management System - Requirements
-# Render.com Deployment
-# =====================================================
-
-# Core Web Framework
-flask==3.0.3
+Flask==3.0.2
 flask-cors==4.0.0
-
-# Computer Vision (headless version for server - no GUI needed)
 opencv-python-headless==4.9.0.80
-
-# AI / Object Detection
-ultralytics==8.1.47
-
-# HTTP requests (kept for optional FastAPI bridge)
-requests==2.31.0
-
-# WSGI Server for Production (Render uses this)
-gunicorn==22.0.0
-
-# Database (SQLite built-in, but keep for compatibility)
-# sqlite3 is part of Python stdlib - no install needed
-
-# Numpy (required by OpenCV + YOLO)
+ultralytics==8.1.24
+torch==2.2.1
+torchvision==0.17.1
 numpy==1.26.4
+cryptography==42.0.5
+gunicorn==21.2.0
