@@ -1,22 +1,23 @@
 import sqlite3
 import datetime
+import os
 
+# Database file name
 DB_NAME = "smartcity_noc.db"
 
 def get_connection():
-    # Database connection establish karne ke liye helper function
+    """Database connection establish karne ke liye helper function."""
     conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row # Isse data dictionary format me milta hai
+    conn.row_factory = sqlite3.Row 
     return conn
 
 def init_db():
+    """Tables create karne aur default admin banane ke liye."""
     try:
         conn = get_connection()
         c = conn.cursor()
         
-        # ==========================================
-        # TABLE 1: ADMIN USERS (Login/Security)
-        # ==========================================
+        # TABLE 1: ADMIN USERS
         c.execute('''
             CREATE TABLE IF NOT EXISTS admin_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,12 +26,9 @@ def init_db():
                 role TEXT DEFAULT 'System Admin'
             )
         ''')
-        # Default Admin ID bana do agar nahi hai toh
         c.execute("INSERT OR IGNORE INTO admin_users (username, password) VALUES ('admin', 'admin123')")
 
-        # ==========================================
-        # TABLE 2: HELPDESK TICKETS (Incident Logs)
-        # ==========================================
+        # TABLE 2: HELPDESK TICKETS
         c.execute('''
             CREATE TABLE IF NOT EXISTS helpdesk_tickets (
                 ticket_id TEXT PRIMARY KEY,
@@ -42,9 +40,7 @@ def init_db():
             )
         ''')
 
-        # ==========================================
-        # TABLE 3: ADVANCED TRAFFIC LOGS (Analytics)
-        # ==========================================
+        # TABLE 3: TRAFFIC LOGS
         c.execute('''
             CREATE TABLE IF NOT EXISTS traffic_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,18 +57,17 @@ def init_db():
 
         conn.commit()
         conn.close()
-        print("✅ Smart City Database & Tables Initialized Successfully!")
+        print("✅ Smart City Database Initialized Successfully on Replit!")
     except Exception as e:
         print(f"❌ Database Init Error: {e}")
 
-# --- 1. TRAFFIC DATA LOGGING FUNCTION ---
+# --- TRAFFIC LOGGING ---
 def log_traffic_data(node_id, counts, pcu, signal):
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = get_connection()
         c = conn.cursor()
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Safe dictionary getters (agar koi gaadi na ho to error na aaye)
         cars = counts.get('car', 0)
         bikes = counts.get('motorbike', 0) + counts.get('bicycle', 0)
         buses = counts.get('bus', 0)
@@ -89,7 +84,7 @@ def log_traffic_data(node_id, counts, pcu, signal):
     except Exception as e:
         print(f"❌ Traffic DB Error: {e}")
 
-# --- 2. HELPDESK TICKET FUNCTIONS ---
+# --- HELPDESK TICKETS ---
 def add_ticket(ticket_id, issue_type, priority, location):
     try:
         conn = get_connection()
@@ -111,27 +106,22 @@ def get_active_tickets():
     try:
         conn = get_connection()
         c = conn.cursor()
-        # Sirf latest 10 active tickets API me bhejenge
         c.execute("SELECT * FROM helpdesk_tickets WHERE status='ACTIVE' ORDER BY timestamp DESC LIMIT 10")
         tickets = c.fetchall()
         conn.close()
         
-        # JSON API friendly format
-        result = []
-        for t in tickets:
-            result.append({
-                "id": t["ticket_id"],
-                "type": t["issue_type"],
-                "priority": t["priority"],
-                "location": t["location"],
-                "time": t["timestamp"].split(" ")[1] # Sirf time (HH:MM:SS) return karenge UI ke liye
-            })
-        return result
+        return [{
+            "id": t["ticket_id"],
+            "type": t["issue_type"],
+            "priority": t["priority"],
+            "location": t["location"],
+            "time": t["timestamp"].split(" ")[1]
+        } for t in tickets]
     except Exception as e:
         print(f"❌ Fetch Tickets Error: {e}")
         return []
 
-# --- 3. ADMIN LOGIN FUNCTION ---
+# --- ADMIN LOGIN ---
 def verify_login(username, password):
     try:
         conn = get_connection()
@@ -143,3 +133,7 @@ def verify_login(username, password):
     except Exception as e:
         print(f"❌ Login DB Error: {e}")
         return False
+
+# Replit trigger: Jab aap file run kareinge, tab database apne aap ban jayega
+if __name__ == "__main__":
+    init_db()
