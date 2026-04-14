@@ -7,9 +7,6 @@ cryptography==42.0.5
 gunicorn==21.2.0
 fastapi
 joblib
-opencv-python
 psutil
 requests
-tensorflow
-torch
 uvicorn
