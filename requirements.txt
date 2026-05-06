@@ -7,6 +7,6 @@ cryptography==42.0.5
 gunicorn==21.2.0
 fastapi
 joblib
-psutil
+joblib
 requests
-uvicorn
+uvicorna

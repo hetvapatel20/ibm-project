@@ -20,7 +20,6 @@
             --accent-warning: #f59e0b; 
         }
 
-        /* --- BASE STYLES --- */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); 
@@ -32,7 +31,6 @@
             min-height: 100vh;
         }
 
-        /* --- HEADER --- */
         .custom-header { 
             background: rgba(11, 15, 25, 0.95); 
             border-bottom: 1px solid var(--border-color); 
@@ -51,23 +49,20 @@
             .custom-header { padding: 0 20px; }
         }
 
-        /* --- WORKSPACE GRID (Flexbox magic for responsiveness) --- */
         .workspace {
             display: flex;
-            flex-direction: column; /* Stack on mobile */
+            flex-direction: column;
             flex: 1;
             padding: 12px;
             gap: 12px;
         }
 
-        /* Desktop specific layout */
         @media (min-width: 1200px) {
-            body { height: 100vh; overflow: hidden; } /* Lock screen on big PC */
+            body { height: 100vh; overflow: hidden; }
             .workspace { flex-direction: row; height: calc(100vh - 65px); overflow: hidden; }
             .left-sidebar { width: 280px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
             .center-main { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow: hidden; }
             .right-sidebar { width: 350px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
-            /* Camera Grid 2x2 */
             .cam-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
@@ -78,29 +73,17 @@
             }
         }
 
-        /* Mobile / Tablet layout */
         @media (max-width: 1199px) {
             .left-sidebar, .right-sidebar { width: 100%; display: flex; flex-direction: column; gap: 12px; }
             .center-main { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-            /* Camera Grid 1 column list */
-            .cam-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-            }
-            .cam-box { height: 250px; } /* Fixed height for cams on mobile */
+            .cam-grid { display: flex; flex-direction: column; gap: 15px; }
+            .cam-box { height: 250px; }
         }
         
         @media (min-width: 768px) and (max-width: 1199px) {
-            /* Tablet Camera Grid 2x2 but scrolling */
-            .cam-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: 300px;
-            }
+            .cam-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 300px; }
         }
 
-        /* --- GLASS CARDS --- */
         .glass-card { 
             background: var(--bg-surface); 
             backdrop-filter: blur(12px);
@@ -113,209 +96,52 @@
         .top-line-danger::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent-danger); }
         .top-line-warning::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent-warning); }
         .top-line-success::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent-success); }
+        .top-line-info::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #0dcaf0; }
 
-        /* --- CAMERAS --- */
         .cam-box { 
-            background: #000; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            border: 1px solid var(--border-color); 
-            position: relative;
-            display: flex; 
-            flex-direction: column;
+            background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); position: relative; display: flex; flex-direction: column;
         }
-        .cam-box img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            flex: 1; 
-            min-height: 0; 
-        }
+        .cam-box img { width: 100%; height: 100%; object-fit: contain; flex: 1; min-height: 0; }
+        .hud-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 8px 12px; background: linear-gradient(rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; align-items: center; }
+        .hud-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: flex; justify-content: space-between; align-items: flex-end; }
         
-        .hud-overlay { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            padding: 8px 12px; 
-            background: linear-gradient(rgba(0,0,0,0.9), transparent); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-        .hud-footer {
-            position: absolute; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            padding: 8px 10px; 
-            background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-end;
-        }
-        
-        /* Mobile text tweaks inside cameras */
         @media (max-width: 500px) {
             .hud-overlay span { font-size: 0.75rem !important; }
             .hud-footer .badge { font-size: 0.65rem !important; padding: 4px !important; }
             .svc-btn { padding: 4px 10px !important; font-size: 0.65rem !important; }
         }
 
-        /* --- SCROLLABLE TABLE --- */
-        .scrollable-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            min-height: 150px; 
-        }
+        .scrollable-container { flex: 1; overflow-y: auto; min-height: 150px; }
         .scrollable-container::-webkit-scrollbar { width: 6px; }
         .scrollable-container::-webkit-scrollbar-track { background: transparent; }
         .scrollable-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-        /* --- BUTTONS --- */
-        .btn-sos { 
-            background: rgba(239, 68, 68, 0.1); 
-            border: 1px solid var(--accent-danger); 
-            color: var(--accent-danger); 
-            transition: 0.3s; 
-        }
-        .btn-sos.active { 
-            background: var(--accent-danger); 
-            color: white; 
-            animation: pulse-red 1s infinite; 
-        }
+        .btn-sos { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-danger); color: var(--accent-danger); transition: 0.3s; }
+        .btn-sos.active { background: var(--accent-danger); color: white; animation: pulse-red 1s infinite; }
         
-        /* THE EXCEL BUTTON */
-        .btn-excel { 
-            background: linear-gradient(135deg, #10b981, #059669); 
-            border: none; 
-            color: white; 
-            transition: 0.3s; 
-        }
-        .btn-excel:hover { 
-            transform: scale(1.02); 
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4); 
-            color: white; 
-        }
+        .btn-excel { background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; transition: 0.3s; }
+        .btn-excel:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4); color: white; }
 
-        .svc-btn { 
-            font-size: 0.75rem; 
-            font-weight: bold; 
-            background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(5px); 
-        }
-        .svc-btn.active { 
-            background: var(--accent-primary); 
-            color: white; 
-            border-color: var(--accent-primary); 
-        }
+        .svc-btn { font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .svc-btn.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
 
-        /* --- TOAST NOTIFICATION CSS --- */
         .toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .custom-toast {
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--accent-primary);
-            color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: flex; align-items: center; gap: 10px; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-size: 0.85rem; min-width: 250px;
-        }
+        .custom-toast { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--accent-primary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 0.85rem; min-width: 250px; }
         .custom-toast.show { transform: translateX(0); }
         .toast-success { border-left-color: var(--accent-success); }
         .toast-error { border-left-color: var(--accent-danger); }
 
-        /* --- CHATBOT --- */
-        .chat-btn {
-            position: fixed; 
-            bottom: 20px; 
-            right: 20px; 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%;
-            background: var(--accent-primary); 
-            color: white; 
-            border: none; 
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5);
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            cursor: pointer; 
-            z-index: 9999;
-        }
-        .chat-window {
-            position: fixed; 
-            bottom: 90px; 
-            right: 20px; 
-            width: 340px; 
-            max-width: calc(100vw - 40px); 
-            height: 450px; 
-            max-height: calc(100vh - 120px); 
-            border-radius: 16px;
-            background: rgba(11, 15, 25, 0.95); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid var(--border-color); 
-            display: flex; 
-            flex-direction: column; 
-            z-index: 9998;
-            transform: translateY(20px); 
-            opacity: 0; 
-            pointer-events: none; 
-            transition: 0.3s;
-        }
-        .chat-window.open { 
-            transform: translateY(0); 
-            opacity: 1; 
-            pointer-events: auto; 
-        }
-        .chat-header { 
-            padding: 12px 15px; 
-            border-bottom: 1px solid var(--border-color); 
-            background: rgba(14, 165, 233, 0.1); 
-            border-radius: 16px 16px 0 0; 
-        }
-        .chat-body { 
-            flex: 1; 
-            padding: 15px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-        }
-        .chat-msg { 
-            max-width: 85%; 
-            padding: 10px 14px; 
-            border-radius: 12px; 
-            font-size: 0.85rem; 
-            line-height: 1.4; 
-        }
-        .msg-bot { 
-            background: rgba(255,255,255,0.05); 
-            color: #e2e8f0; 
-            align-self: flex-start; 
-            border-bottom-left-radius: 4px; 
-        }
-        .msg-user { 
-            background: var(--accent-primary); 
-            color: white; 
-            align-self: flex-end; 
-            border-bottom-right-radius: 4px; 
-        }
-        .chat-footer { 
-            padding: 12px; 
-            border-top: 1px solid var(--border-color); 
-            display: flex; 
-            gap: 8px; 
-        }
-        .chat-input { 
-            flex: 1; 
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid var(--border-color); 
-            color: white; 
-            padding: 10px 15px; 
-            border-radius: 20px; 
-            outline: none; 
-            font-size: 0.85rem; 
-        }
+        .chat-btn { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--accent-primary); color: white; border: none; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 9999; }
+        .chat-window { position: fixed; bottom: 90px; right: 20px; width: 340px; max-width: calc(100vw - 40px); height: 450px; max-height: calc(100vh - 120px); border-radius: 16px; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 9998; transform: translateY(20px); opacity: 0; pointer-events: none; transition: 0.3s; }
+        .chat-window.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .chat-header { padding: 12px 15px; border-bottom: 1px solid var(--border-color); background: rgba(14, 165, 233, 0.1); border-radius: 16px 16px 0 0; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; line-height: 1.4; }
+        .msg-bot { background: rgba(255,255,255,0.05); color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-user { background: var(--accent-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-footer { padding: 12px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
+        .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; padding: 10px 15px; border-radius: 20px; outline: none; font-size: 0.85rem; }
 
-        /* ANIMATIONS */
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .dot-online { width: 10px; height: 10px; background: var(--accent-success); border-radius: 50%; animation: pulse-green 2s infinite; }
@@ -336,10 +162,10 @@
         <div class="d-flex align-items-center gap-2 gap-md-4">
             <span class="badge rounded-pill clock-badge px-2 py-1 px-md-3 py-md-2 text-white fs-6 border-secondary shadow-sm d-none d-md-block" id="live-clock">00:00:00</span>
             <div class="d-flex align-items-center gap-2">
-                <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff&rounded=true" width="32" class="rounded-circle d-none d-sm-block" alt="Admin">
+                <img src="https://ui-avatars.com/api/?name={{ session.get('username', 'Admin') }}&background=0D8ABC&color=fff&rounded=true" width="32" class="rounded-circle d-none d-sm-block" alt="Profile">
                 <div class="d-flex flex-column lh-1 d-none d-sm-block">
-                    <span class="fw-bold text-white" style="font-size: 0.8rem;">System Admin</span>
-                    <small class="text-success fw-bold" style="font-size: 0.6rem;">Level 1</small>
+                    <span class="fw-bold text-white" style="font-size: 0.8rem;">{{ session.get('username', 'Admin') | title }}</span>
+                    <small class="text-success fw-bold" style="font-size: 0.6rem;">{{ session.get('role', 'System Admin') }}</small>
                 </div>
             </div>
             <a href="/logout" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-md-3 shadow-sm fw-bold">
@@ -349,7 +175,6 @@
     </header>
 
     <div class="workspace">
-
         <div class="left-sidebar">
             <div class="glass-card border-success p-2 p-xl-3 text-center">
                 <div class="d-inline-flex align-items-center gap-2 mb-1 mb-xl-2 bg-dark rounded-pill px-3 py-1 border border-success border-opacity-25">
@@ -359,27 +184,44 @@
                 <p class="text-secondary mb-0 d-none d-xl-block" style="font-size: 0.75rem;">Neural Network is actively processing all nodes.</p>
             </div>
 
+            {% if session.get('role') == 'System Admin' %}
             <div class="glass-card p-3 border-danger border-opacity-50">
                 <small class="text-danger fw-bold text-uppercase d-block text-center mb-2" style="font-size: 0.7rem;">Emergency Action</small>
                 <button id="btn-acc" class="btn btn-sos w-100 py-2 py-xl-3 fw-bold rounded-3 shadow-lg d-flex justify-content-center align-items-center gap-2" onclick="toggleAcc()">
                     <span class="material-icons-round fs-5 fs-xl-4">warning</span> <span id="acc-text">CRISIS LOCKDOWN</span>
                 </button>
             </div>
-
+            
             <a href="/export_excel" class="btn btn-excel w-100 py-2 py-xl-3 fw-bold rounded-3 shadow-lg d-flex justify-content-center align-items-center gap-2 text-decoration-none">
-                <span class="material-icons-round fs-5 fs-xl-4">table_view</span> <span>DOWNLOAD EXCEL</span>
+                <span class="material-icons-round fs-5 fs-xl-4">download</span> <span>EXPORT DATA</span>
             </a>
 
+            <div class="glass-card p-3 border-info border-opacity-50 mt-1">
+                <h6 class="text-info fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                    <span class="material-icons-round fs-5">person_add</span> Create User
+                </h6>
+                <input type="text" id="new-username" class="form-control form-control-sm bg-dark text-white border-secondary mb-2" placeholder="New Username">
+                <input type="password" id="new-password" class="form-control form-control-sm bg-dark text-white border-secondary mb-2" placeholder="New Password">
+                <select id="new-role" class="form-select form-select-sm bg-dark text-white border-secondary mb-3">
+                    <option value="Helpdesk" selected>Helpdesk Staff (Limited)</option>
+                    <option value="System Admin">System Admin (Full Access)</option>
+                </select>
+                <button id="btn-create-user" class="btn btn-sm btn-outline-info w-100 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2" onclick="createNewUser()">
+                    <span class="material-icons-round fs-6">add_circle</span> CREATE ACCOUNT
+                </button>
+            </div>
+            {% endif %}
+
+            <a href="/service-desk" target="_blank" class="btn w-100 py-2 py-xl-3 fw-bold rounded-3 shadow-lg d-flex justify-content-center align-items-center gap-2 text-decoration-none mt-1" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; transition: transform 0.3s;">
+                <span class="material-icons-round fs-5 fs-xl-4">support_agent</span> <span>OPEN IT DESK</span>
+            </a>
+            
             <div class="glass-card p-2 p-xl-3 d-flex flex-column mt-1" style="flex: 1; min-height: 200px;">
                 <h6 class="text-white fw-bold mb-2 mb-xl-3 d-flex align-items-center gap-2" style="font-size: 0.85rem;"><span class="material-icons-round text-info fs-5">timeline</span> Node Status</h6>
                 <div class="scrollable-container">
                     <table class="table table-dark table-hover table-borderless align-middle mb-0" style="font-size: 0.75rem;">
                         <thead class="text-secondary border-bottom border-secondary sticky-top bg-dark">
-                            <tr>
-                                <th>LANE</th>
-                                <th>STATE</th>
-                                <th class="text-end">VOL</th>
-                            </tr>
+                            <tr><th>LANE</th><th>STATE</th><th class="text-end">VOL</th></tr>
                         </thead>
                         <tbody id="stats-table">
                             <tr><td colspan="3" class="text-center text-secondary py-3">Initializing...</td></tr>
@@ -390,7 +232,6 @@
         </div>
 
         <div class="center-main">
-            
             <div class="row g-2 flex-shrink-0">
                 <div class="col-6 col-md-3">
                     <div class="glass-card top-line-primary p-2 p-xl-3 text-center h-100 d-flex flex-column justify-content-center">
@@ -532,11 +373,7 @@
                 <div class="scrollable-container">
                     <table class="table table-dark table-hover table-sm border-transparent align-middle mb-0" style="font-size: 0.7rem;">
                         <thead class="text-secondary sticky-top bg-dark border-bottom border-secondary">
-                            <tr>
-                                <th>ISSUE</th>
-                                <th>LOCATION</th>
-                                <th>PRI</th>
-                            </tr>
+                            <tr><th>ISSUE</th><th>LOCATION</th><th>PRI</th></tr>
                         </thead>
                         <tbody id="ticket-table">
                             <tr><td colspan="3" class="text-center text-secondary py-4">Fetching active tickets...</td></tr>
@@ -578,7 +415,6 @@
             document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-US', { hour12: false }) + " IST"; 
         }, 1000);
 
-        // --- 🚀 PREMIUM TOAST NOTIFICATION SYSTEM ---
         function showNotification(message, isError = false) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -588,12 +424,8 @@
             toast.innerHTML = `<span class="material-icons-round fs-5">${icon}</span> <span>${message}</span>`;
             
             container.appendChild(toast);
-            
             setTimeout(() => { toast.classList.add('show'); }, 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, 3500);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
         }
 
         // CHATBOT LOGIC
@@ -604,9 +436,7 @@
             ci.innerText = cw.classList.contains('open') ? 'close' : 'chat'; 
         }
 
-        function handleChatEnter(e) { 
-            if(e.key === 'Enter') sendMessage(); 
-        }
+        function handleChatEnter(e) { if(e.key === 'Enter') sendMessage(); }
 
         async function sendMessage() {
             const inputField = document.getElementById('chat-input');
@@ -636,7 +466,43 @@
             }
         }
 
-        // --- 🎫 TICKET SUBMISSION WITH LOADING ANIMATION ---
+        // --- 👤 ADMIN: CREATE NEW USER VIA UI ---
+        async function createNewUser() {
+            const u = document.getElementById('new-username').value.trim();
+            const p = document.getElementById('new-password').value.trim();
+            const r = document.getElementById('new-role').value;
+            const btn = document.getElementById('btn-create-user');
+
+            if(!u || !p) return showNotification("Please enter Username and Password!", true);
+
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/add_new_user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: u, password: p, role: r})
+                });
+                const data = await res.json();
+                
+                if(data.status === "success") {
+                    showNotification(data.message);
+                    document.getElementById('new-username').value = "";
+                    document.getElementById('new-password').value = "";
+                } else {
+                    showNotification(data.message, true);
+                }
+            } catch(e) {
+                showNotification("Server connection failed.", true);
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- 🎫 TICKET SUBMISSION ---
         async function submitTicket() {
             const type = document.getElementById('ticket-type').value;
             const priority = document.getElementById('ticket-priority').value;
@@ -645,7 +511,6 @@
             
             if(!location) return showNotification("Please enter incident location!", true);
             
-            // Loading State
             const originalText = btn.innerHTML;
             btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...`;
             btn.disabled = true;
@@ -667,7 +532,6 @@
             } catch(e) {
                 showNotification("Connection error with server.", true);
             } finally {
-                // Restore button
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -711,7 +575,6 @@
                 let totalHeavy = 0;
                 let tableHtml = "";
 
-                // Process Camera Data
                 data.lanes.forEach((lane, i) => {
                     const counts = lane.counts || {};
                     const cars = counts.car || 0;
@@ -757,29 +620,27 @@
                     }
                 });
 
-                // Update Top Stats & Node Table
                 document.getElementById('total-vehicles').innerText = totalVehicles.toLocaleString(); 
                 document.getElementById('total-heavy').innerText = totalHeavy.toLocaleString(); 
                 document.getElementById('active-lane').innerText = `LANE 0${data.priority_lane + 1}`; 
                 document.getElementById('stats-table').innerHTML = tableHtml;
                 
-                // Update Global SOS UI
                 const accBtn = document.getElementById('btn-acc');
                 const accText = document.getElementById('acc-text');
                 const sysStatus = document.getElementById('sys-status');
                 const statusDot = document.getElementById('status-dot');
                 
                 if(data.accident_mode) { 
-                    accBtn.classList.add('active'); 
-                    accText.innerText = "RESUME TRAFFIC"; 
+                    if(accBtn) accBtn.classList.add('active'); 
+                    if(accText) accText.innerText = "RESUME TRAFFIC"; 
                     sysStatus.innerText = "CRISIS PROTOCOL"; 
                     sysStatus.className = "fw-bold text-danger"; 
                     statusDot.style.background = "var(--accent-danger)"; 
                     statusDot.style.boxShadow = "0 0 10px var(--accent-danger)"; 
                     statusDot.style.animation = "pulse-red 1s infinite"; 
                 } else { 
-                    accBtn.classList.remove('active'); 
-                    accText.innerText = "CRISIS LOCKDOWN"; 
+                    if(accBtn) accBtn.classList.remove('active'); 
+                    if(accText) accText.innerText = "CRISIS LOCKDOWN"; 
                     sysStatus.innerText = "SYSTEM SECURE"; 
                     sysStatus.className = "fw-bold text-success"; 
                     statusDot.style.background = "var(--accent-success)"; 
@@ -787,7 +648,6 @@
                     statusDot.style.animation = "pulse-green 2s infinite"; 
                 }
                 
-                // 🔥 UPDATED TICKETS TABLE PARSER (With Colored Badges) 🔥
                 const ticketTable = document.getElementById('ticket-table');
                 if (!data.helpdesk_tickets || data.helpdesk_tickets.length === 0) { 
                     ticketTable.innerHTML = "<tr><td colspan='3' class='text-center text-secondary py-4'>System Normal. No Active Events.</td></tr>"; 
@@ -797,7 +657,6 @@
                         let badgeHtml = "";
                         let pri = t.priority ? t.priority.toUpperCase() : "LOW";
                         
-                        // Set colors based on priority
                         if(pri.includes("CRIT")) badgeHtml = `<span class="badge bg-danger shadow-sm">CRIT</span>`; 
                         else if(pri.includes("HIGH")) badgeHtml = `<span class="badge bg-warning text-dark shadow-sm">HIGH</span>`; 
                         else if(pri.includes("MED")) badgeHtml = `<span class="badge bg-info text-dark shadow-sm">MED</span>`; 

@@ -3,32 +3,34 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 
-# Strict validation choices
 class SeverityEnum(str, Enum):
     low = "low"
     medium = "medium"
     high = "high"
     critical = "critical"
+    # 🔥 Fix for Database Capital letters
+    Low = "Low"
+    Medium = "Medium"
+    High = "High"
+    Critical = "Critical"
 
 class StatusEnum(str, Enum):
     open = "open"
     in_progress = "in_progress"
     resolved = "resolved"
 
-# Frontend se jo data aayega (Create Ticket)
 class TicketCreate(BaseModel):
     issue_type: str
     location: str
     device_id: str
-    severity: SeverityEnum
+    severity: str # Changed to simple string to avoid any validation block
 
-# Frontend ko jo data return hoga (Full Ticket Details)
 class TicketResponse(TicketCreate):
     ticket_id: int
-    status: StatusEnum
+    status: str # Changed to simple string to avoid block
     assigned_engineer: Optional[str] = None
     created_at: datetime
     resolved_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True  # SQLAlchemy object ko JSON me convert karne ke liye
+        from_attributes = True

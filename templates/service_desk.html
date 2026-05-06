@@ -9,21 +9,26 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #070b14; color: white; padding: 20px; }
-        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
         .stat-box { border-left: 4px solid #0ea5e9; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; }
         .table-dark { --bs-table-bg: transparent; }
         .badge-open { background-color: #ef4444; }
         .badge-progress { background-color: #f59e0b; color: black; }
         .badge-resolved { background-color: #10b981; }
+        .log-table th { color: #f59e0b !important; }
     </style>
 </head>
 <body>
+
+    <script>
+        const SESSION_ROLE = "{{ session.get('role', 'Unknown') }}";
+    </script>
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold mb-0 text-info"><span class="material-icons-round align-middle">support_agent</span> NOC Service Desk</h3>
-                <small class="text-secondary">Internal Incident Management System (Local)</small>
+                <small class="text-secondary">Internal Incident Management System</small>
             </div>
             <button class="btn btn-outline-info rounded-pill" onclick="fetchTickets()">
                 <span class="material-icons-round align-middle fs-5">refresh</span> Refresh Data
@@ -31,24 +36,9 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="stat-box" style="border-color: #0ea5e9;">
-                    <h6 class="text-secondary fw-bold">TOTAL TICKETS</h6>
-                    <h2 class="mb-0 fw-bold" id="stat-total">0</h2>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-box" style="border-color: #ef4444;">
-                    <h6 class="text-secondary fw-bold">OPEN / UNASSIGNED</h6>
-                    <h2 class="mb-0 fw-bold text-danger" id="stat-open">0</h2>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-box" style="border-color: #10b981;">
-                    <h6 class="text-secondary fw-bold">RESOLVED</h6>
-                    <h2 class="mb-0 fw-bold text-success" id="stat-resolved">0</h2>
-                </div>
-            </div>
+            <div class="col-md-4"><div class="stat-box" style="border-color: #0ea5e9;"><h6 class="text-secondary fw-bold">TOTAL TICKETS</h6><h2 class="mb-0 fw-bold" id="stat-total">0</h2></div></div>
+            <div class="col-md-4"><div class="stat-box" style="border-color: #ef4444;"><h6 class="text-secondary fw-bold">OPEN / UNASSIGNED</h6><h2 class="mb-0 fw-bold text-danger" id="stat-open">0</h2></div></div>
+            <div class="col-md-4"><div class="stat-box" style="border-color: #10b981;"><h6 class="text-secondary fw-bold">RESOLVED</h6><h2 class="mb-0 fw-bold text-success" id="stat-resolved">0</h2></div></div>
         </div>
 
         <div class="glass-card">
@@ -57,104 +47,239 @@
                 <table class="table table-dark table-hover align-middle">
                     <thead class="text-secondary border-bottom border-secondary">
                         <tr>
-                            <th>TKT ID</th>
-                            <th>ISSUE & LOCATION</th>
-                            <th>PRIORITY</th>
-                            <th>STATUS</th>
-                            <th>ASSIGNED TO</th>
-                            <th>TIME</th>
-                            <th class="text-end">ACTIONS</th>
+                            <th>TKT ID</th><th>ISSUE & LOCATION</th><th>PRIORITY</th><th>STATUS</th><th>ASSIGNED TO</th><th>TIME</th><th class="text-end">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody id="tickets-tbody">
-                        <tr><td colspan="7" class="text-center py-4 text-secondary">Loading tickets from FastAPI...</td></tr>
+                        <tr><td colspan="7" class="text-center py-4 text-secondary">Loading tickets...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        {% if session.get('role') == 'System Admin' %}
+        <div class="glass-card border-warning border-opacity-50">
+            <h5 class="fw-bold mb-3 text-warning">
+                <span class="material-icons-round align-middle fs-4">policy</span> Security Audit Logs <small class="text-secondary fs-6 fw-normal">(Immutable)</small>
+            </h5>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-dark table-sm align-middle log-table">
+                    <thead class="sticky-top bg-dark border-bottom border-secondary">
+                        <tr><th>LOG ID</th><th>TIMESTAMP</th><th>ADMIN</th><th>ACTION</th><th>DETAILS</th></tr>
+                    </thead>
+                    <tbody id="logs-tbody">
+                        <tr><td colspan="5" class="text-center py-3 text-secondary">Fetching secure logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
-    <script>
-        const API_BASE = "http://127.0.0.1:8000/api/v1/tickets";
+    <div class="modal fade" id="assignModal" tabindex="-1" data-bs-theme="dark" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold text-info"><span class="material-icons-round align-middle">engineering</span> Assign Engineer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary small mb-3">Assigning Ticket <strong class="text-white" id="modal-ticket-id-display"></strong></p>
+                    <label class="form-label text-info fw-bold mb-1" style="font-size: 0.8rem;">Select Available Staff:</label>
+                    <select id="engineer-select" class="form-select bg-dark text-white border-secondary shadow-sm">
+                        <option value="">Fetching secure list...</option>
+                    </select>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirm-btn" type="button" class="btn btn-primary fw-bold" onclick="confirmAssignment()">Confirm Assignment</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 1. DATA MANGWANA (GET)
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 🔥 MAGIC: Auto-detect current IP so it works anywhere (localhost or 192.x or 10.x) 🔥
+        const CURRENT_HOST = window.location.hostname;
+        const API_BASE = `http://${CURRENT_HOST}:8000/api/v1/tickets`;
+        
+        let currentTicketToAssign = null;
+        let assignModalInstance = null;
+
+        // 1. FETCH TICKETS
         async function fetchTickets() {
             try {
                 const response = await fetch(API_BASE + "/");
+                if(!response.ok) throw new Error("Network Response Error");
                 const tickets = await response.json();
                 
-                // Stats update karna
                 document.getElementById('stat-total').innerText = tickets.length;
                 document.getElementById('stat-open').innerText = tickets.filter(t => t.status === 'open').length;
                 document.getElementById('stat-resolved').innerText = tickets.filter(t => t.status === 'resolved').length;
 
-                // Table me data dalna
                 let html = "";
-                // Ulta kar rahe hain taaki nayi ticket upar dikhe
                 tickets.reverse().forEach(t => {
-                    let statusBadge = t.status === 'open' ? '<span class="badge badge-open">OPEN</span>' : 
-                                      t.status === 'in_progress' ? '<span class="badge badge-progress">IN PROGRESS</span>' : 
-                                      '<span class="badge badge-resolved">RESOLVED</span>';
-                    
+                    let statusBadge = t.status === 'open' ? '<span class="badge badge-open">OPEN</span>' : t.status === 'in_progress' ? '<span class="badge badge-progress">IN PROGRESS</span>' : '<span class="badge badge-resolved">RESOLVED</span>';
                     let engineer = t.assigned_engineer ? `<span class="text-info fw-bold">${t.assigned_engineer}</span>` : '<span class="text-secondary">Unassigned</span>';
-                    
                     let time = new Date(t.created_at).toLocaleTimeString();
 
-                    // Buttons logic
                     let actionButtons = "";
                     if (t.status === 'open') {
-                        actionButtons = `<button class="btn btn-sm btn-primary fw-bold" onclick="assignTicket(${t.ticket_id})">Assign</button>`;
+                        actionButtons = `<button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="openAssignModal(${t.ticket_id})">Assign</button>`;
                     } else if (t.status === 'in_progress') {
-                        actionButtons = `<button class="btn btn-sm btn-success fw-bold" onclick="resolveTicket(${t.ticket_id})">Mark Resolved</button>`;
+                        actionButtons = `<button class="btn btn-sm btn-success fw-bold shadow-sm" onclick="resolveTicket(${t.ticket_id})">Mark Resolved</button>`;
                     } else {
                         actionButtons = `<span class="text-success fw-bold"><span class="material-icons-round fs-6 align-middle">done_all</span> Closed</span>`;
                     }
 
-                    html += `
-                        <tr class="border-bottom border-secondary border-opacity-25">
-                            <td class="fw-bold text-secondary">#${t.ticket_id}</td>
-                            <td>
-                                <div class="fw-bold text-white">${t.issue_type}</div>
-                                <div style="font-size: 0.8rem;" class="text-secondary">${t.location}</div>
-                            </td>
-                            <td><span class="badge bg-dark border border-secondary text-uppercase">${t.severity}</span></td>
-                            <td>${statusBadge}</td>
-                            <td>${engineer}</td>
-                            <td class="text-secondary" style="font-size: 0.85rem;">${time}</td>
-                            <td class="text-end">${actionButtons}</td>
-                        </tr>
-                    `;
+                    // 🔥 RBAC: DELETE BUTTON FOR ADMINS 🔥
+                    if (SESSION_ROLE === 'System Admin') {
+                        const safeIssue = encodeURIComponent(t.issue_type);
+                        const safeLoc = encodeURIComponent(t.location);
+                        actionButtons += `<button class="btn btn-sm btn-outline-danger ms-2 shadow-sm" onclick="deleteTicket(${t.ticket_id}, '${safeIssue}', '${safeLoc}')" title="Permanently Delete">
+                                            <span class="material-icons-round fs-6 align-middle">delete_forever</span>
+                                          </button>`;
+                    }
+
+                    html += `<tr class="border-bottom border-secondary border-opacity-25">
+                                <td class="fw-bold text-secondary">#${t.ticket_id}</td>
+                                <td><div class="fw-bold text-white">${t.issue_type}</div><div style="font-size: 0.8rem;" class="text-secondary">${t.location}</div></td>
+                                <td><span class="badge bg-dark border border-secondary text-uppercase">${t.severity}</span></td>
+                                <td>${statusBadge}</td><td>${engineer}</td><td class="text-secondary" style="font-size: 0.85rem;">${time}</td>
+                                <td class="text-end">${actionButtons}</td>
+                             </tr>`;
                 });
-                document.getElementById('tickets-tbody').innerHTML = html || "<tr><td colspan='7' class='text-center py-4'>No tickets found.</td></tr>";
+                document.getElementById('tickets-tbody').innerHTML = html || "<tr><td colspan='7' class='text-center py-4 text-secondary'>No active tickets found.</td></tr>";
             } catch (e) {
-                document.getElementById('tickets-tbody').innerHTML = `<tr><td colspan='7' class='text-center py-4 text-danger'>Failed to connect to FastAPI Backend. Is the server running?</td></tr>`;
+                document.getElementById('tickets-tbody').innerHTML = `<tr><td colspan='7' class='text-center py-4 text-danger'>Failed to load data. Ensure FastAPI is running on Port 8000.</td></tr>`;
             }
         }
 
-        // 2. ENGINEER ASSIGN KARNA (PUT)
-        async function assignTicket(id) {
-            let engName = prompt("Enter Engineer Name (e.g., Nisarg, John):");
-            if (!engName) return;
+        // 2. DELETE TICKET
+        async function deleteTicket(id, issue_enc, loc_enc) {
+            const issue = decodeURIComponent(issue_enc);
+            const loc = decodeURIComponent(loc_enc);
+            
+            if (!confirm(`🚨 WARNING!\nAre you sure you want to permanently delete Ticket #${id}?\n\nThis action will be logged in the Security Audit Trail.`)) return;
 
             try {
-                await fetch(`${API_BASE}/${id}/assign?engineer_name=${engName}`, { method: 'PUT' });
-                fetchTickets(); // Refresh table
-            } catch(e) { alert("Error assigning ticket"); }
+                const res = await fetch(`/delete_ticket/${id}`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ issue_type: issue, location: loc })
+                });
+                const data = await res.json();
+                
+                if(data.status === "success") {
+                    fetchTickets(); 
+                    if(SESSION_ROLE === 'System Admin') fetchAuditLogs(); 
+                } else {
+                    alert("Delete Failed: " + data.message);
+                }
+            } catch(e) { alert("Server connection error during deletion."); }
         }
 
-        // 3. TICKET CLOSE KARNA (PUT)
-        async function resolveTicket(id) {
-            if (!confirm("Are you sure this issue is fixed?")) return;
+        // 3. FETCH AUDIT LOGS
+        async function fetchAuditLogs() {
+            if (SESSION_ROLE !== 'System Admin') return;
+            try {
+                const res = await fetch('/get_audit_logs');
+                const data = await res.json();
+                let html = "";
+                data.logs.forEach(l => {
+                    html += `<tr>
+                                <td class="text-secondary fw-bold">LOG-${l.id}</td>
+                                <td class="text-secondary" style="font-size:0.8rem;">${l.timestamp}</td>
+                                <td class="text-info fw-bold">${l.admin_name}</td>
+                                <td><span class="badge bg-danger">${l.action}</span></td>
+                                <td class="text-white">${l.details}</td>
+                             </tr>`;
+                });
+                document.getElementById('logs-tbody').innerHTML = html || "<tr><td colspan='5' class='text-center py-3 text-secondary'>No audit logs generated yet.</td></tr>";
+            } catch(e) { console.error("Could not fetch logs"); }
+        }
+
+        // 4. OPEN ASSIGN MODAL
+        async function openAssignModal(id) {
+            currentTicketToAssign = id;
+            document.getElementById('modal-ticket-id-display').innerText = `#${id}`;
+            
+            // Get or create modal instance safely
+            const modalEl = document.getElementById('assignModal');
+            assignModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            
+            const selectEl = document.getElementById('engineer-select');
+            selectEl.innerHTML = '<option value="">Fetching secure staff list...</option>';
+            
+            assignModalInstance.show();
 
             try {
-                await fetch(`${API_BASE}/${id}/close`, { method: 'PUT' });
-                fetchTickets(); // Refresh table
+                const res = await fetch('/get_valid_users');
+                const data = await res.json();
+                const users = data.valid_users || [];
+                
+                if (users.length === 0) { 
+                    selectEl.innerHTML = '<option value="" disabled>No registered staff found!</option>'; 
+                    return; 
+                }
+                
+                selectEl.innerHTML = '<option value="" disabled selected>-- Choose a Staff Member --</option>';
+                users.forEach(u => {
+                    let displayName = u.charAt(0).toUpperCase() + u.slice(1);
+                    selectEl.innerHTML += `<option value="${displayName}">${displayName} (Registered Staff)</option>`;
+                });
+            } catch (e) { 
+                selectEl.innerHTML = '<option value="" disabled>Error loading staff list.</option>'; 
+            }
+        }
+
+        // 5. CONFIRM ASSIGNMENT
+        async function confirmAssignment() {
+            const engName = document.getElementById('engineer-select').value;
+            if (!engName) { 
+                alert("⚠️ Please select a staff member from the dropdown."); 
+                return; 
+            }
+
+            const btn = document.getElementById('confirm-btn');
+            btn.innerHTML = "Assigning...";
+            btn.disabled = true;
+
+            try {
+                await fetch(`${API_BASE}/${currentTicketToAssign}/assign?engineer_name=${encodeURIComponent(engName)}`, { method: 'PUT' });
+                
+                // Hide modal safely
+                if (assignModalInstance) {
+                    assignModalInstance.hide();
+                }
+                
+                fetchTickets(); 
+            } catch(e) { 
+                alert("Error assigning ticket."); 
+            } finally {
+                btn.innerHTML = "Confirm Assignment";
+                btn.disabled = false;
+            }
+        }
+
+        // 6. RESOLVE TICKET
+        async function resolveTicket(id) {
+            if (!confirm("Are you sure this issue is fixed?")) return;
+            try { 
+                await fetch(`${API_BASE}/${id}/close`, { method: 'PUT' }); 
+                fetchTickets(); 
             } catch(e) { alert("Error resolving ticket"); }
         }
 
-        // Har 3 second me table auto-update hogi
+        // --- INITIALIZE & LOOPS ---
         fetchTickets();
-        setInterval(fetchTickets, 3000);
+        if(SESSION_ROLE === 'System Admin') fetchAuditLogs();
+        
+        // Auto-refresh every 4 seconds
+        setInterval(fetchTickets, 4000);
+        setInterval(() => { if(SESSION_ROLE === 'System Admin') fetchAuditLogs(); }, 6000);
     </script>
 </body>
 </html>

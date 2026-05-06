@@ -1,38 +1,60 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware # Naya CORS feature
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware 
 import asyncio
 from contextlib import asynccontextmanager
 
-from . import models
-from .database import engine
+# Rate Limiter setup
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+# Import your modules
+from . import database
 from .routes import router
 from .monitor import start_monitoring
 
-# Database tables create karna
-models.Base.metadata.create_all(bind=engine)
+# 1. Limiter Setup (IP address track karne ke liye)
+limiter = Limiter(key_func=get_remote_address)
 
+# 🔥 MODERN LIFESPAN (Database + Monitor dono yahan start honge)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Run the monitoring system in the background
+    # --- DUAL DATABASE STARTUP ---
+    print("⏳ Initializing Databases (Local & Cloud)...")
+    database.init_db()  # Yeh function dono DB me tables aur default Admin bana dega
+    
+    # --- BACKGROUND MONITOR STARTUP ---
+    print("🚀 Starting Background Monitor...")
     task = asyncio.create_task(start_monitoring())
-    yield
-    # Shutdown logic
+    
+    yield # App jab tak chalegi, yahan ruki rahegi
+    
+    # --- SHUTDOWN CLEANUP ---
     task.cancel()
 
+# App initialize karna
 app = FastAPI(title="SmartCity Service Desk", lifespan=lifespan)
 
-# 🔥 CORS CONFIGURATION (Taki HTML page API se baat kar sake) 🔥
+# 2. Limiter ko App ke sath jodna aur Error Handler lagana
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 🔥 CORS FIX: Allow All Origins so UI doesn't hang 🔥
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"], # Har IP se request allow karega
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routes add karna
+# 3. Router include karna
 app.include_router(router, prefix="/api/v1", tags=["Tickets"])
 
 @app.get("/")
-def root():
-    return {"message": "SmartCity Ticket System is Running! Go to /docs for API documentation."}
+@limiter.limit("10/minute") 
+def root(request: Request): # 'request' pass karna zaroori hai limiter ke liye
+    return {
+        "message": "SmartCity Ticket System API is Running Perfectly!", 
+        "docs": "Go to /docs for API documentation."
+    }
